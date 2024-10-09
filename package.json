@@ -1,0 +1,14 @@
+{
+  "name": "spiderbyte-server",
+  "version": "1.0.0",
+  "description": "this is the server/api connecting to the spiderbyte website and db",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kade Shockey, Cece Housh, Vincent Cordova, Ben Fast, Michael Runnels",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
