@@ -9,8 +9,8 @@ const app = express();
 // Load environment variables
 dotenv.config();  // Call dotenv to load .env file
 
-// Middleware (if needed)
-app.use(express.json());  // To parse JSON requests
+//middle ware that allows us to parse json data from the request body
+app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -18,9 +18,10 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('Error connecting to MongoDB', err));
 
 // API Routes
-app.use('/api/users', userRoutes);  // Prefix routes with /api/users
+// Prefix routes with /api/users
+app.use('/api/users', userRoutes);
 
-// Start the server
+// Start the server user port 5000, if ENV isnt setup use 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
