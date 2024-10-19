@@ -13,6 +13,7 @@ const attemptedProblemSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
+  firebase_id: { type: String, required: true, unique: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   profile_picture: { type: String },
   solved_problems: [solvedProblemSchema],
