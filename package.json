@@ -11,6 +11,7 @@
   "author": "Kade Shockey, Cece Housh, Vincent Cordova, Ben Fast, Michael Runnels",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.10.4",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.1"
