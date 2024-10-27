@@ -7,4 +7,5 @@ const subjectSchema = new mongoose.Schema({
   image: { type: String }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Subject', subjectSchema);
+
+export default mongoose.model('Subject', subjectSchema);

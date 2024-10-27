@@ -3,6 +3,7 @@ import mongoose from 'mongoose';  // Import mongoose
 import dotenv from 'dotenv';  // Import dotenv for environment variables
 import userRoutes from './api/routes/user_routes.js';  // Import user routes (note the .js extension)
 import submissionRoutes from './api/routes/submission_routes.js';  // Import submission routes
+import subjectRoutes from './api/routes/subject_routes.js';  // Import subject routes
 import cors from 'cors';
 
 // Initialize express app
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 // API Routes
 app.use('/api/users', userRoutes);  // Prefix routes with /api/users
 app.use('/api/submissions', submissionRoutes);  // Prefix routes with /api/submissions
+app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
 
 // Start the server
 const PORT = process.env.PORT || 3000;
