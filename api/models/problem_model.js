@@ -37,6 +37,8 @@ const challengeSchema = new mongoose.Schema(
     question_solutions: { type: [String], required: false },
     skeleton_code: skeletonCodeSchema, // New field for skeleton code
     hints: { type: [String], default: [] }, // New field for hints
+    subject_tags: { type: [String], default: [], required: false }, // New field for subject_tags
+    content_tags: { type: [String], default: [], required: false }, // New field for content_tags
   },
   { timestamps: true }
 );
