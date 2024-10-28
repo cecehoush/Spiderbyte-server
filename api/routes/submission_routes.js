@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Challenge } from '../models/problem_model.js'; // For fetching test cases
+import Challenge from '../models/problem_model.js'; // For fetching test cases
 import { Submission } from '../models/submission_model.js'; // Assuming the model is exported correctly
 import User from '../models/user_model.js'; // For validation
 import * as amqplib from 'amqplib';

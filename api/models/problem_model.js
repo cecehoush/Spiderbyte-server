@@ -1,15 +1,26 @@
 import mongoose from "mongoose";
 
 const testcaseSchema = new mongoose.Schema({
+  inputs: { type: [mongoose.Schema.Types.Mixed], required: true }, // Array to handle multiple inputs
+  expected_output: { type: String, required: true },
+});
+
+const problemDescriptionSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  input_format: { type: String, required: true },
+  output_format: { type: String, required: true },
+  constraints: { type: String, required: true },
+});
+
+const skeletonCodeSchema = new mongoose.Schema({
   language: { type: String, required: true },
-  input: { type: String, required: true },
-  output: { type: String, required: true },
+  code: { type: String, required: true },
 });
 
 const challengeSchema = new mongoose.Schema(
   {
-    question_name: { type: String, required: true },
-    question_description: { type: String, required: true },
+    challenge_title: { type: String, required: true }, // Renamed from question_name
+    problem_description: { type: problemDescriptionSchema, required: true },
     question_difficulty: {
       type: Number,
       required: true,
@@ -22,11 +33,12 @@ const challengeSchema = new mongoose.Schema(
     languages_supported: { type: [String], required: true },
     daily_question: { type: Date },
     subject: { type: String, required: true },
-    question_testcases: [testcaseSchema],
-    question_solutions: { type: [String], required: true },
+    test_cases: [testcaseSchema], // Updated from question_testcases
+    question_solutions: { type: [String], required: false },
+    skeleton_code: skeletonCodeSchema, // New field for skeleton code
+    hints: { type: [String], default: [] }, // New field for hints
   },
   { timestamps: true }
 );
 
-const Challenge = mongoose.model("Challenge", challengeSchema);
-export { Challenge };
+export default mongoose.model("Challenge", challengeSchema);
