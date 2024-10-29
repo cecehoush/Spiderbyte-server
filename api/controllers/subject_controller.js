@@ -1,5 +1,5 @@
 import Subject from '../models/subject_model.js';
-import Challenge from '../models/problem_model.js';
+import Challenge from '../models/challenge_model.js';
 
 // Fetch all subjects
 export async function getSubjects(req, res) {
