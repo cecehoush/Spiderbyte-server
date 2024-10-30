@@ -1,4 +1,4 @@
-import Challenge from '../models/problem_model.js';
+import Challenge from '../models/challenge_model.js';
 import Subject from '../models/subject_model.js';
 
 export async function getChallenges(req, res) {

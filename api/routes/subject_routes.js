@@ -19,10 +19,10 @@ router.route('/:id')
     .get(subjectController.getSubjectById);
 
 
-router.route('/:subjectId/problems')
+router.route('/:subjectId/challenges')
     .get(subjectController.getChallengesBySubjectId);
 
-router.route('/name/:name/problems')
+router.route('/name/:name/challenges')
     .get(subjectController.getChallengesBySubjectName);
 
 
