@@ -16,7 +16,8 @@ router.route('/some')
 
 
 router.route('/:id')
-    .get(subjectController.getSubjectById);
+    .get(subjectController.getSubjectById)
+    .put(subjectController.updateSubject);
 
 
 router.route('/:subjectId/challenges')

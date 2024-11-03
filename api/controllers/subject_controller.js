@@ -85,3 +85,16 @@ export async function getChallengesBySubjectName(req, res) {
         return res.status(500).json({ error: err.message });
     }
 }
+
+export async function updateSubject
+(req, res) {
+    try {
+        const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!subject) {
+            return res.status(404).json({ error: 'Subject not found' });
+        }
+        return res.status(200).json(subject);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}

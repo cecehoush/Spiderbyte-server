@@ -5,6 +5,7 @@ import userRoutes from './api/routes/user_routes.js';  // Import user routes (no
 import submissionRoutes from './api/routes/submission_routes.js';  // Import submission routes
 import subjectRoutes from './api/routes/subject_routes.js';  // Import subject routes
 import challengeRoutes from './api/routes/challenge_routes.js';  // Import problem routes
+import tagRoutes from './api/routes/tag_routes.js';
 import cors from 'cors';
 
 // Initialize express app
@@ -27,6 +28,7 @@ app.use('/api/users', userRoutes);  // Prefix routes with /api/users
 app.use('/api/submissions', submissionRoutes);  // Prefix routes with /api/submissions
 app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
 app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/problems
+app.use('/api/tags', tagRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
