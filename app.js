@@ -69,8 +69,7 @@ wss.on('connection', (ws, req) => {
 
   const decodedSessionId = fullSessionId ? decodeURIComponent(fullSessionId) : null;
   const sessionId = decodedSessionId.substring(2).split('.')[0]; 
-  // console.log("In app.js SID:", sessionId);
-  // console.log("Decoded session ID:", decodedSessionId);
+  
 
   console.log("session id", sessionId);
   if (sessionId) { 
@@ -98,7 +97,7 @@ wss.on('connection', (ws, req) => {
 
       ws.on('close', () => {
         console.log('Client disconnected');
-        // delete session.clientConnections[clientId]; // Clean up when the client disconnects
+        delete session.clientConnections[clientId]; // Clean up when the client disconnects
       });
       
       console.log(`Client connected with ID: ${clientId}`);
