@@ -71,7 +71,6 @@ router.post('/results', (req, res) => {
         return res.status(404).send('Session not found');
       }
 
-      console.log("client connections in results", session.clientConnection);
       // Log the session data and client connections
       if (session.clientConnections && session.clientConnections[clientId]) {
         const clientConnection = session.clientConnections[clientId]; // Retrieve the WebSocket from session
