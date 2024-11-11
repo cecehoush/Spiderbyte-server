@@ -89,7 +89,6 @@ wss.on('connection', (ws, req) => {
         session.clientConnections = {}; // Initialize if not already set
       }
       session.clientConnections[clientId] = ws; // Store the WebSocket connection
-      console.log("store check: ", store);
 
       // send the client their ID and the session id
       ws.send(JSON.stringify({ clientId, sessionId }));
