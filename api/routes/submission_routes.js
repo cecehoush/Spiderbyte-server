@@ -4,24 +4,29 @@ import { Submission } from '../models/submission_model.js'; // Assuming the mode
 import User from '../models/user_model.js'; // For validation
 import * as amqplib from 'amqplib';
 import express from 'express';
+import { store }  from '../../app.js';  // Import the store from app.js
+
 const { Connection, Message } = amqplib;
 
 const router = express.Router();
 
+// Route for submitting code
 router.post('/', async (req, res) => {
   try {
-    const { userid, usercode, test_cases } = req.body;
+    const { userid, clientId, sessionId, usercode, test_cases } = req.body;
 
     // Prepare the submission data in the format expected by the Python script
     const submissionData = {
       userid,
+      clientId,
+      sessionId,
       usercode,
       test_cases,
     };
 
     // Connect to RabbitMQ
     const rabbitUrl = 'amqp://localhost:5672'; // default RabbitMQ URL
-    const connection = await amqplib.connect(rabbitUrl); 
+    const connection = await amqplib.connect(rabbitUrl);
     const channel = await connection.createConfirmChannel(); // Create confirm channel
 
     // Declare the queue (optional but recommended to ensure it exists)
@@ -54,5 +59,41 @@ router.post('/', async (req, res) => {
     res.status(500).send('Failed to send submission to queue');
   }
 });
+
+// Route for handling results from the microservice 
+router.post('/results', (req, res) => {
+  const { clientId, sessionId, results } = req.body; // Accept clientId and results
+
+  console.log('In results:', sessionId)
+  store.get(sessionId, (err, session) => {
+      if (err || !session) {
+        console.log('Session not found:', err);
+        return res.status(404).send('Session not found');
+      }
+
+      console.log("client connections in results", session.clientConnection);
+      // Log the session data and client connections
+      if (session.clientConnections && session.clientConnections[clientId]) {
+        const clientConnection = session.clientConnections[clientId]; // Retrieve the WebSocket from session
+        
+        // Send results to the client
+        sendResultsToClient(clientConnection, results);
+        console.log("client socket", clientSocket);
+        console.log(`Results sent to client for clientId: ${clientId}`);
+    }  else {
+      console.log(`No client found for clientId: ${clientId}`);
+    }
+  });
+});
+
+// Function to send results to a specific client
+function sendResultsToClient(ws, results) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ results }));
+  } else {
+    console.log(`WebSocket is not open for the client.`);
+  }
+}
+
 
 export default router;
