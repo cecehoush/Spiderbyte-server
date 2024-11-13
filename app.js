@@ -5,6 +5,7 @@ import userRoutes from './api/routes/user_routes.js';  // Import user routes
 import submissionRoutes from './api/routes/submission_routes.js';  // Import submission routes
 import subjectRoutes from './api/routes/subject_routes.js';  // Import subject routes
 import challengeRoutes from './api/routes/challenge_routes.js';  // Import problem routes
+import tagRoutes from './api/routes/tag_routes.js';
 import cors from 'cors';
 import session from 'express-session';
 import connectMongo from 'connect-mongodb-session'; // Import MongoDB store for sessions
@@ -58,10 +59,10 @@ app.use(cors({
 app.use('/api/users', userRoutes);  // Prefix routes with /api/users
 app.use('/api/submissions', submissionRoutes);  // Prefix routes with /api/submissions
 app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
-app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/challenges
+app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/problems
+app.use('/api/tags', tagRoutes);
+
 // New route for testing session
-
-
 wss.on('connection', (ws, req) => {
   const cookies = req.headers.cookie?.split('; ');
   const sessionCookie = cookies?.find(cookie => cookie.startsWith('connect.sid='));
