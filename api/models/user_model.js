@@ -13,6 +13,7 @@ const attemptedProblemSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   profile_picture: { type: String },
   solved_problems: [solvedProblemSchema],
@@ -20,7 +21,8 @@ const userSchema = new mongoose.Schema({
   created_playlists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Playlist' }],
   preferences: {
     language: { type: String, default: 'Python' },
-    content_tags: { type: [String], default: [] }
+    subject_tags: { type: [mongoose.Schema.Types.ObjectId], ref: 'Subject', default: [] },
+    content_tags: { type: [mongoose.Schema.Types.ObjectId], ref: 'Tag', default: [] }
   },
   join_date: { type: Date, default: Date.now }
 }, { timestamps: true });
