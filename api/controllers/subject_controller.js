@@ -11,6 +11,55 @@ export async function getSubjects(req, res) {
     }
 }
 
+export async function assignQuestionToSubjects(req, res) {
+    try {
+        console.log('Request Body:', req.body);
+
+        const subjectNames = req.body.subjects;
+        const challengeTitle = req.body.challenge_title;
+
+        // Validate the request body
+        if (!subjectNames || !challengeTitle) {
+            return res.status(400).json({ error: 'Subjects and challenge title are required' });
+        }
+
+        // Find the challenge by its title
+        const challenge = await Challenge.findOne({ challenge_name: challengeTitle });
+        if (!challenge) {
+            return res.status(404).json({ error: 'Challenge not found' });
+        }
+
+        // Find subjects by their names
+        const subjects = await Subject.find({ name: { $in: subjectNames } });
+
+        if (subjects.length === 0) {
+            return res.status(404).json({ error: 'No subjects found' });
+        }
+
+        // Ensure `subject._id` is used correctly
+        for (let subject of subjects) {
+            if (!mongoose.Types.ObjectId.isValid(subject._id)) {
+                console.error(`Invalid ObjectId for subject: ${subject.name}`);
+                continue;
+            }
+
+            await Subject.findByIdAndUpdate(
+                subject._id,
+                { $addToSet: { related_problems: challenge._id } },
+                { new: true }
+            );
+        }
+
+        return res.status(200).json({ message: 'Challenge assigned to subjects successfully' });
+
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+
+
 // Create a new subject
 export async function createSubject(req, res) {
     try {
