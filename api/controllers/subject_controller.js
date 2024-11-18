@@ -1,6 +1,9 @@
 import Subject from '../models/subject_model.js';
 import Challenge from '../models/challenge_model.js';
 
+import mongoose from "mongoose";
+
+
 // Fetch all subjects
 export async function getSubjects(req, res) {
     try {
@@ -10,6 +13,7 @@ export async function getSubjects(req, res) {
         return res.status(500).json({ error: err.message });
     }
 }
+
 
 export async function assignQuestionToSubjects(req, res) {
     try {
@@ -23,41 +27,60 @@ export async function assignQuestionToSubjects(req, res) {
             return res.status(400).json({ error: 'Subjects and challenge title are required' });
         }
 
-        // Find the challenge by its title
-        const challenge = await Challenge.findOne({ challenge_name: challengeTitle });
+        // Find the challenge by its title - Changed from challenge_name to challenge_title
+        const challenge = await Challenge.findOne({ challenge_title: challengeTitle });
+        
         if (!challenge) {
-            return res.status(404).json({ error: 'Challenge not found' });
+            return res.status(404).json({ 
+                error: 'Challenge not found', 
+                searchedTitle: challengeTitle // Add this for debugging
+            });
         }
 
         // Find subjects by their names
         const subjects = await Subject.find({ name: { $in: subjectNames } });
 
         if (subjects.length === 0) {
-            return res.status(404).json({ error: 'No subjects found' });
+            return res.status(404).json({ 
+                error: 'No subjects found',
+                searchedSubjects: subjectNames // Add this for debugging
+            });
         }
 
-        // Ensure `subject._id` is used correctly
-        for (let subject of subjects) {
+        // Log the found challenge and subjects for debugging
+        console.log('Found challenge:', challenge._id);
+        console.log('Found subjects:', subjects.map(s => ({ id: s._id, name: s.name })));
+
+        // Update each subject
+        const updateResults = await Promise.all(subjects.map(subject => {
             if (!mongoose.Types.ObjectId.isValid(subject._id)) {
                 console.error(`Invalid ObjectId for subject: ${subject.name}`);
-                continue;
+                return null;
             }
 
-            await Subject.findByIdAndUpdate(
+            return Subject.findByIdAndUpdate(
                 subject._id,
                 { $addToSet: { related_problems: challenge._id } },
                 { new: true }
             );
-        }
+        }));
 
-        return res.status(200).json({ message: 'Challenge assigned to subjects successfully' });
+        // Filter out any null results from invalid ObjectIds
+        const successfulUpdates = updateResults.filter(result => result !== null);
+
+        return res.status(200).json({ 
+            message: 'Challenge assigned to subjects successfully',
+            updatedSubjects: successfulUpdates.map(s => s.name)
+        });
 
     } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ error: err.message });
+        console.error('Error in assignQuestionToSubjects:', err);
+        res.status(500).json({ 
+            error: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 }
-
 
 
 // Create a new subject
