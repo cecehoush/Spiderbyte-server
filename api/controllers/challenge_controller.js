@@ -1,5 +1,6 @@
 import Challenge from '../models/challenge_model.js';
 import Subject from '../models/subject_model.js';
+import * as amqplib from 'amqplib';
 
 import mongoose from "mongoose";
 
@@ -99,5 +100,72 @@ export async function getChallengeById(req, res) {
     } catch (err) {
         return res.status(500).json({ error: err });
     }
+}
+
+export async function createNewChallenge(req, res) {
+    try {
+        const { userid, subject_tags, difficulty, content_tags, challenge_title } = req.body;
+
+        // Data to send to RabbitMQ
+        const data = { userid, subject_tags, difficulty, content_tags, challenge_title };
+
+        const rabbitUrl = "amqp://localhost:5672"; // RabbitMQ URL
+        const connection = await amqplib.connect(rabbitUrl);
+        const channel = await connection.createChannel();
+
+        // Declare the request queue
+        const queueName = "challenge_queue";
+        await channel.assertQueue(queueName, { durable: true });
+
+        // Create a temporary reply queue
+        const replyQueue = await channel.assertQueue('', { exclusive: true });
+
+        // Generate a unique correlation ID
+        const correlationId = generateUuid();
+
+        // Listen for responses
+        channel.consume(replyQueue.queue, async (msg) => {
+            if (msg.properties.correlationId === correlationId) {
+                const challengeName = msg.content.toString();
+                console.log("Received response:", challengeName);
+
+                try {
+                    // Find the challenge by title
+                    const challenge = await Challenge.findOne({ challenge_title: challengeName });
+                    if (!challenge) {
+                        console.error("Challenge not found");
+                        return res.status(404).json({ error: 'Challenge not found' });
+                    }
+
+                    // Respond with the challenge ID
+                    res.status(200).json({ challengeID: challenge._id });
+                } catch (err) {
+                    console.error("Error finding challenge:", err);
+                    res.status(500).json({ error: "Error finding challenge" });
+                } finally {
+                    // Close the channel and connection
+                    channel.close();
+                    connection.close();
+                }
+            }
+        }, { noAck: true });
+
+        console.log("Creating a challenge for the user...");
+
+        // Send the message to the queue
+        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), {
+            correlationId,
+            replyTo: replyQueue.queue,
+        });
+
+    } catch (err) {
+        console.error("Server error:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+// Helper function to generate a unique correlation ID
+function generateUuid() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 

@@ -13,4 +13,7 @@ router.route('/some')
 router.route('/:id')
     .get(challengeController.getChallengeById);
 
+router.route('/getquestion')
+    .post(challengeController.createNewChallenge)
+
 export default router;

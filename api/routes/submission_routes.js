@@ -13,7 +13,7 @@ const router = express.Router();
 // Route for submitting code
 router.post('/', async (req, res) => {
   try {
-    const { userid, clientId, sessionId, usercode, test_cases, challenge, challenge_name } = req.body;
+    const { userid, clientId, sessionId, usercode, test_cases, challengeID } = req.body;
 
     // Prepare the submission data in the format expected by the Python script
     const submissionData = {
@@ -22,8 +22,7 @@ router.post('/', async (req, res) => {
       sessionId,
       usercode,
       test_cases,
-      challenge_name,
-      challenge, // Include the optional challenge field
+      challengeID,
     };
 
     // Connect to RabbitMQ
