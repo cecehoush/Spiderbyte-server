@@ -1,5 +1,6 @@
 import User from '../models/user_model.js';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 
 export async function getUsers(req, res) {
   try {
@@ -145,3 +146,37 @@ export async function removeUserContentTags(req, res) {
   }
 }
 
+export async function addChallengeCompletion(req, res) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    user.solved_problems.push({
+      challenge_id: req.body.challenge_id,
+      solved_at: new Date()
+    });
+    await user.save();
+    return res.status(200).json(user);
+  } catch (err) {
+    return res.status(500).json({ error: err });
+  }
+}
+
+export async function getUserSolvedChallenges(req, res) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(200).json(user.solved_problems);
+  } catch (err) {
+    return res.status(500).json({ error: err });
+  }
+}

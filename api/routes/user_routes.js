@@ -21,4 +21,8 @@ router.route('/:userId/tags/content')
     .put(userController.updateUserContentTags)
     .delete(userController.removeUserContentTags);
 
+router.route('/:userId/solved')
+    .get(userController.getUserSolvedChallenges)
+    .post(userController.addChallengeCompletion);
+
 export default router;

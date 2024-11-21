@@ -13,14 +13,14 @@ const router = express.Router();
 // Route for submitting code
 router.post('/', async (req, res) => {
   try {
-    const { userid, clientId, sessionId, usercode, test_cases, challenge, challenge_name } = req.body;
+    const { userid, clientId, sessionId, code, test_cases, challenge, challenge_name } = req.body;
 
     // Prepare the submission data in the format expected by the Python script
     const submissionData = {
       userid,
       clientId,
       sessionId,
-      usercode,
+      code,
       test_cases,
       challenge_name,
       challenge, // Include the optional challenge field
@@ -111,7 +111,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:title', async (req, res) =>{
+router.get('/:title', async (req, res) => {
   try {
 
     const { title } = req.params;
@@ -133,7 +133,7 @@ router.get('/:title', async (req, res) =>{
 router.put('/:title', async (req, res) => {
   try {
     const { title } = req.params;
-    const { user_id, problem_id, code, language, valid_solution, submitted_at, execution_time, error_messages } = req.body;
+    const { user_id, challenge_id, code, language, valid_solution, submitted_at, execution_time, error_messages } = req.body;
 
     // Find the submission by title
     const submission = await Submission.findOne({ challenge_name: title });
@@ -143,7 +143,7 @@ router.put('/:title', async (req, res) => {
     }
     // Update only the populated fields
     if (user_id !== undefined) submission.user_id = user_id;
-    if (problem_id !== undefined) submission.problem_id = problem_id;
+    if (challenge_id !== undefined) submission.challenge_id = challenge_id;
     if (code !== undefined) submission.code = code;
     if (language !== undefined) submission.language = language;
     if (valid_solution !== undefined) submission.valid_solution = valid_solution;
