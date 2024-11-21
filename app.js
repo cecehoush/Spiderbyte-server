@@ -62,44 +62,47 @@ app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
 app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/problems
 app.use('/api/tags', tagRoutes);
 
-// New route for testing session
+// Create a map to store active WebSocket connections
+const activeConnections = new Map();
+
+// WebSocket connection handler
 wss.on('connection', (ws, req) => {
   const cookies = req.headers.cookie?.split('; ');
   const sessionCookie = cookies?.find(cookie => cookie.startsWith('connect.sid='));
   const fullSessionId = sessionCookie ? sessionCookie.split('=')[1] : null;
-
   const decodedSessionId = fullSessionId ? decodeURIComponent(fullSessionId) : null;
-  const sessionId = decodedSessionId.substring(2).split('.')[0]; 
-  
+  const sessionId = decodedSessionId?.substring(2).split('.')[0];
 
-  console.log("session id", sessionId);
-  if (sessionId) { 
-    //Retrieve the session using the session ID 
-    store.get(sessionId, (err, session) => { 
+  if (sessionId) {
+    store.get(sessionId, (err, session) => {
       if (err || !session) {
         console.log('Session not found:', err);
         ws.close();
         return;
       }
 
-      //Generate a unique client ID for this connection instance
       const clientId = uuidv4();
       
-      // Store the WebSocket connection and clientId in the session
-      if (!session.clientConnections) {
-        session.clientConnections = {}; // Initialize if not already set
+      // Store the connection in our Map instead of the session
+      if (!activeConnections.has(sessionId)) {
+        activeConnections.set(sessionId, new Map());
       }
-      session.clientConnections[clientId] = ws; // Store the WebSocket connection
+      activeConnections.get(sessionId).set(clientId, ws);
 
-      // send the client their ID and the session id
+      // Send client their ID and session ID
       ws.send(JSON.stringify({ clientId, sessionId }));
-      console.log("intial socket message:", JSON.stringify({ clientId, sessionId }))
-
-      ws.on('close', () => {
-        console.log('Client disconnected');
-        delete session.clientConnections[clientId]; // Clean up when the client disconnects
-      });
       
+      ws.on('close', () => {
+        console.log(`Client disconnected: ${clientId}`);
+        const sessionConnections = activeConnections.get(sessionId);
+        if (sessionConnections) {
+          sessionConnections.delete(clientId);
+          if (sessionConnections.size === 0) {
+            activeConnections.delete(sessionId);
+          }
+        }
+      });
+
       console.log(`Client connected with ID: ${clientId}`);
     });
   } else {
@@ -114,4 +117,4 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-export { store };
+export { store, activeConnections };

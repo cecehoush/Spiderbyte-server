@@ -4,7 +4,8 @@ import { Submission } from '../models/submission_model.js'; // Assuming the mode
 import User from '../models/user_model.js'; // For validation
 import * as amqplib from 'amqplib';
 import express from 'express';
-import { store }  from '../../app.js';  // Import the store from app.js
+import { store, activeConnections } from '../../app.js';
+import { WebSocket } from 'ws';
 
 const { Connection, Message } = amqplib;
 
@@ -62,37 +63,27 @@ router.post('/', async (req, res) => {
 
 // Route for handling results from the microservice 
 router.post('/results', (req, res) => {
-  const { clientId, sessionId, results } = req.body; // Accept clientId and results
+  const { clientId, sessionId, results } = req.body;
 
-  console.log('In results:', sessionId)
-  store.get(sessionId, (err, session) => {
-      if (err || !session) {
-        console.log('Session not found:', err);
-        return res.status(404).send('Session not found');
-      }
-
-      // Log the session data and client connections
-      if (session.clientConnections && session.clientConnections[clientId]) {
-        const clientConnection = session.clientConnections[clientId]; // Retrieve the WebSocket from session
-        
-        // Send results to the client
-        sendResultsToClient(clientConnection, results);
-        console.log("client socket", clientSocket);
-        console.log(`Results sent to client for clientId: ${clientId}`);
-    }  else {
-      console.log(`No client found for clientId: ${clientId}`);
-    }
-  });
+  const sessionConnections = activeConnections.get(sessionId);
+  if (sessionConnections && sessionConnections.has(clientId)) {
+    const ws = sessionConnections.get(clientId);
+    sendResultsToClient(ws, results);
+    console.log(`Results sent to client ${clientId}`);
+    res.status(200).json({ message: 'Results sent successfully' });
+  } else {
+    console.log(`No client found for clientId: ${clientId} in session: ${sessionId}`);
+    res.status(404).json({ message: 'Client connection not found' });
+  }
 });
 
-// Function to send results to a specific client
+// Helper function to send results to client
 function sendResultsToClient(ws, results) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ results }));
   } else {
-    console.log(`WebSocket is not open for the client.`);
+    console.log('WebSocket is not in OPEN state');
   }
 }
-
 
 export default router;
