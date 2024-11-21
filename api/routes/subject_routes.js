@@ -14,6 +14,8 @@ router.route('/')
 router.route('/some')
     .get(subjectController.getSomeSubjects);
 
+router.route('/assignQuestionToSubjects')
+    .put(subjectController.assignQuestionToSubjects)
 
 router.route('/:id')
     .get(subjectController.getSubjectById)

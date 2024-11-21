@@ -3,9 +3,8 @@ import * as challengeController from '../controllers/challenge_controller.js';
 
 const router = express.Router();
 
-router.route('/')
-    .get(challengeController.getChallenges)
-    .post(challengeController.createChallenge);
+router.route('/').get(challengeController.getChallenges)
+router.route('/').post(challengeController.createChallenge);
 
 router.route('/some')
     .get(challengeController.getSomeChallenges);
