@@ -14,7 +14,7 @@ const router = express.Router();
 // Route for submitting code
 router.post('/', async (req, res) => {
   try {
-    const { userid, clientId, sessionId, code, test_cases, challenge, challenge_name } = req.body;
+    const { userid, clientId, sessionId, code, test_cases, challenge, challenge_name, challenge_difficulty } = req.body;
 
     // Prepare the submission data in the format expected by the Python script
     const submissionData = {
@@ -24,6 +24,7 @@ router.post('/', async (req, res) => {
       code,
       test_cases,
       challenge_name,
+      challenge_difficulty,
       challenge, // Include the optional challenge field
     };
 
@@ -116,6 +117,20 @@ router.get('/:title', async (req, res) => {
     else return res.status(404);
 
     
+  } catch (error) {
+    console.error('Failed to fetch submissions:', error);
+    res.status(500);
+  }
+});
+
+// Make a router to get all submissions for a specific user ordered by date
+router.get('/user/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const submissions = await Submission.find({ user_id: id }).sort({ submitted_at: 'desc' });
+
+    res.status(200).json(submissions);
   } catch (error) {
     console.error('Failed to fetch submissions:', error);
     res.status(500);
