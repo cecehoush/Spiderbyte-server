@@ -12,6 +12,8 @@ router.route('/name/:title')
 router.route('/some')
     .get(challengeController.getSomeChallenges);
 
+router.route('/daily')
+    .get(challengeController.getDailyChallenge);
 
 router.route('/:id')
     .get(challengeController.getChallengeById);
