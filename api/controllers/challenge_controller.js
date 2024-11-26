@@ -14,6 +14,24 @@ export async function getChallenges(req, res) {
     }
 }
 
+export async function getChallengeByName(req, res) {
+    try {
+        const challenge = await Challenge
+
+            .findOne({ challenge_title: req.params.title });
+
+        if (challenge !== null) {
+            return res.status(200).json(challenge);
+        }
+        else return res.status(404);
+
+
+    } catch (err) {
+        console.error('Failed to fetch challenges:', err);
+        return res.status(500);
+    }
+}
+
 export async function createChallenge(req, res) {
     try {
         // Transform the incoming data to match schema structure

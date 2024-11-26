@@ -6,6 +6,9 @@ const router = express.Router();
 router.route('/').get(challengeController.getChallenges)
 router.route('/').post(challengeController.createChallenge);
 
+router.route('/name/:title')
+    .get(challengeController.getChallengeByName);
+
 router.route('/some')
     .get(challengeController.getSomeChallenges);
 

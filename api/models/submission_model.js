@@ -26,6 +26,7 @@ const submissionSchema = new mongoose.Schema({
   },
   problem_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Challenge', required: false },
   challenge_name: {type: String, required: false},
+  challenge_difficulty: {type: Number, required: false},
   code: { type: String, required: true },
   language: { type: String, required: true },
   output: { type: String, required: false },

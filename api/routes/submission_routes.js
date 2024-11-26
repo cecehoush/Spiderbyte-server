@@ -4,7 +4,8 @@ import { Submission } from '../models/submission_model.js'; // Assuming the mode
 import User from '../models/user_model.js'; // For validation
 import * as amqplib from 'amqplib';
 import express from 'express';
-import { store }  from '../../app.js';  // Import the store from app.js
+import { store, activeConnections } from '../../app.js';
+import { WebSocket } from 'ws';
 
 const { Connection, Message } = amqplib;
 
@@ -13,16 +14,19 @@ const router = express.Router();
 // Route for submitting code
 router.post('/', async (req, res) => {
   try {
-    const { userid, clientId, sessionId, usercode, test_cases, challengeID } = req.body;
+    const { userid, clientId, sessionId, code, test_cases, challenge, challenge_name, challenge_difficulty } = req.body;
 
     // Prepare the submission data in the format expected by the Python script
     const submissionData = {
       userid,
       clientId,
       sessionId,
-      usercode,
+      code,
       test_cases,
       challengeID,
+      challenge_name,
+      challenge_difficulty,
+      challenge, // Include the optional challenge field
     };
 
     // Connect to RabbitMQ
@@ -66,35 +70,26 @@ router.post('/', async (req, res) => {
 
 // Route for handling results from the microservice 
 router.post('/results', (req, res) => {
-  const { clientId, sessionId, results } = req.body; // Accept clientId and results
+  const { clientId, sessionId, results } = req.body;
 
-  console.log('In results:', sessionId)
-  store.get(sessionId, (err, session) => {
-      if (err || !session) {
-        console.log('Session not found:', err);
-        return res.status(404).send('Session not found');
-      }
-
-      // Log the session data and client connections
-      if (session.clientConnections && session.clientConnections[clientId]) {
-        const clientConnection = session.clientConnections[clientId]; // Retrieve the WebSocket from session
-        
-        // Send results to the client
-        sendResultsToClient(clientConnection, results);
-        console.log("client socket", clientSocket);
-        console.log(`Results sent to client for clientId: ${clientId}`);
-    }  else {
-      console.log(`No client found for clientId: ${clientId}`);
-    }
-  });
+  const sessionConnections = activeConnections.get(sessionId);
+  if (sessionConnections && sessionConnections.has(clientId)) {
+    const ws = sessionConnections.get(clientId);
+    sendResultsToClient(ws, results);
+    console.log(`Results sent to client ${clientId}`);
+    res.status(200).json({ message: 'Results sent successfully' });
+  } else {
+    console.log(`No client found for clientId: ${clientId} in session: ${sessionId}`);
+    res.status(404).json({ message: 'Client connection not found' });
+  }
 });
 
-// Function to send results to a specific client
+// Helper function to send results to client
 function sendResultsToClient(ws, results) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ results }));
   } else {
-    console.log(`WebSocket is not open for the client.`);
+    console.log('WebSocket is not in OPEN state');
   }
 }
 
@@ -110,7 +105,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:title', async (req, res) =>{
+router.get('/:title', async (req, res) => {
   try {
 
     const { title } = req.params;
@@ -129,10 +124,24 @@ router.get('/:title', async (req, res) =>{
   }
 });
 
+// Make a router to get all submissions for a specific user ordered by date
+router.get('/user/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const submissions = await Submission.find({ user_id: id }).sort({ submitted_at: 'desc' });
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error('Failed to fetch submissions:', error);
+    res.status(500);
+  }
+});
+
 router.put('/:title', async (req, res) => {
   try {
     const { title } = req.params;
-    const { user_id, problem_id, code, language, valid_solution, submitted_at, execution_time, error_messages } = req.body;
+    const { user_id, challenge_id, code, language, valid_solution, submitted_at, execution_time, error_messages } = req.body;
 
     // Find the submission by title
     const submission = await Submission.findOne({ challenge_name: title });
@@ -142,7 +151,7 @@ router.put('/:title', async (req, res) => {
     }
     // Update only the populated fields
     if (user_id !== undefined) submission.user_id = user_id;
-    if (problem_id !== undefined) submission.problem_id = problem_id;
+    if (challenge_id !== undefined) submission.challenge_id = challenge_id;
     if (code !== undefined) submission.code = code;
     if (language !== undefined) submission.language = language;
     if (valid_solution !== undefined) submission.valid_solution = valid_solution;
