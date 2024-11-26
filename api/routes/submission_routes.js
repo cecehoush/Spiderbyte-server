@@ -23,7 +23,6 @@ router.post('/', async (req, res) => {
       sessionId,
       code,
       test_cases,
-      challengeID,
       challenge_name,
       challenge_difficulty,
       challenge, // Include the optional challenge field
