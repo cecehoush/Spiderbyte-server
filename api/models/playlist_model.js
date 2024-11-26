@@ -4,7 +4,7 @@ const playlistSchema = new mongoose.Schema({
   name: { type: String, required: true },
   created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   description: { type: String },
-  questions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' }],
+  challenges: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' }],
   upvotes: { type: Number, default: 0 },
   downvotes: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now },
