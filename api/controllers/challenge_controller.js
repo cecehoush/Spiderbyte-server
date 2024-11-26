@@ -118,4 +118,3 @@ export async function getChallengeById(req, res) {
         return res.status(500).json({ error: err });
     }
 }
-

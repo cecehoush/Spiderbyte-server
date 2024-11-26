@@ -3,7 +3,7 @@ import * as challengeController from '../controllers/challenge_controller.js';
 
 const router = express.Router();
 
-router.route('/').get(challengeController.getChallenges)
+router.route('/').get(challengeController.getChallenges);
 router.route('/').post(challengeController.createChallenge);
 
 router.route('/name/:title')
