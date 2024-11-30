@@ -14,8 +14,13 @@ router.route('/some')
 
 // Get challenges by a list of challenge IDs
 router.post('/by-ids', challengeController.getChallengesByIds);
+router.route('/daily')
+    .get(challengeController.getDailyChallenge);
 
 router.route('/:id')
     .get(challengeController.getChallengeById);
+
+router.route('/getquestion')
+    .post(challengeController.createNewChallenge)
 
 export default router;
