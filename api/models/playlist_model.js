@@ -11,4 +11,4 @@ const playlistSchema = new mongoose.Schema({
   is_public: { type: Boolean, default: true }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Playlist', playlistSchema);
+export default mongoose.model('Playlist', playlistSchema);

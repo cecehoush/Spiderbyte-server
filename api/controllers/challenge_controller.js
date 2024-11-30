@@ -118,3 +118,14 @@ export async function getChallengeById(req, res) {
         return res.status(500).json({ error: err });
     }
 }
+
+// Get challenges by a list of challenge IDs
+export async function getChallengesByIds(req, res) {
+    try {
+        const { challengeIds } = req.body; // Expect an array of challenge IDs in the request body
+        const challenges = await Challenge.find({ _id: { $in: challengeIds } });
+        res.status(200).json(challenges);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving challenges', error });
+    }
+}

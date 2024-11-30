@@ -6,6 +6,7 @@ import submissionRoutes from './api/routes/submission_routes.js';  // Import sub
 import subjectRoutes from './api/routes/subject_routes.js';  // Import subject routes
 import challengeRoutes from './api/routes/challenge_routes.js';  // Import problem routes
 import tagRoutes from './api/routes/tag_routes.js';
+import playlistRoutes from './api/routes/playlist_routes.js';
 import cors from 'cors';
 import session from 'express-session';
 import connectMongo from 'connect-mongodb-session'; // Import MongoDB store for sessions
@@ -61,6 +62,7 @@ app.use('/api/submissions', submissionRoutes);  // Prefix routes with /api/submi
 app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
 app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/problems
 app.use('/api/tags', tagRoutes);
+app.use('/api/playlists', playlistRoutes);
 
 // Create a map to store active WebSocket connections
 const activeConnections = new Map();

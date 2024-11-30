@@ -12,6 +12,8 @@ router.route('/name/:title')
 router.route('/some')
     .get(challengeController.getSomeChallenges);
 
+// Get challenges by a list of challenge IDs
+router.post('/by-ids', challengeController.getChallengesByIds);
 
 router.route('/:id')
     .get(challengeController.getChallengeById);
