@@ -13,6 +13,7 @@ import http from 'http'; // Import the HTTP module
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid'; // Import UUID for generating unique IDs
 import { credentials } from 'amqplib';
+import searchRoutes from './api/routes/search_routes.js';
 
 // Initialize express app
 const app = express();
@@ -61,6 +62,7 @@ app.use('/api/submissions', submissionRoutes);  // Prefix routes with /api/submi
 app.use('/api/subjects', subjectRoutes);  // Prefix routes with /api/subjects
 app.use('/api/challenges', challengeRoutes);  // Prefix routes with /api/problems
 app.use('/api/tags', tagRoutes);
+app.use('/api/search', searchRoutes);
 
 // Create a map to store active WebSocket connections
 const activeConnections = new Map();
